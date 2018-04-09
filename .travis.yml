@@ -1,0 +1,119 @@
+language: generic
+sudo: false
+cache:
+  apt: true
+  directories:
+    - /tmp/tools
+
+env:
+  global:
+    - LIB_INSTALLDIR="$HOME"
+
+matrix:
+  include:
+    - env: LANGUAGE=C++ CXX=g++-5 CC=gcc-5
+      addons:
+        apt:
+          update: true
+          packages:
+            - g++-5
+          sources: &sources
+            - r-packages-trusty
+            - llvm-toolchain-trusty
+            - llvm-toolchain-trusty-4.0
+            - llvm-toolchain-trusty-5.0
+            - llvm-toolchain-trusty-6.0
+            - ubuntu-toolchain-r-test
+    - env: LANGUAGE=C++ CXX=g++-6 CC=gcc-6 DEPLOY=true DEPLOY_FILE="$TRAVIS_BUILD_DIR/../penerator-$TRAVIS_TAG"
+      addons:
+        apt:
+          update: true
+          packages:
+            - g++-6
+          sources: *sources
+    - env: LANGUAGE=C++ CXX=clang++-4.0 CC=clang-4.0
+      addons:
+        apt:
+          update: true
+          packages:
+            - clang-4.0
+          sources: *sources
+    - env: LANGUAGE=C++ CXX=clang++-5.0 CC=clang-5.0
+      addons:
+        apt:
+          update: true
+          packages:
+            - clang-5.0
+          sources: *sources
+    - env: LANGUAGE=C++ CXX=clang++-6.0 CC=clang-6.0
+      addons:
+        apt:
+          update: true
+          packages:
+            - clang-6.0
+          sources: *sources
+    - env: LANGUAGE=Ruby DEPLOY=true DEPLOY_FILE="$TRAVIS_BUILD_DIR/../penerator-man-$TRAVIS_TAG.tbz2"
+      language: ruby
+      rvm: "2.2"
+
+before_install:
+  - if [ "$TRAVIS_SECURE_ENV_VARS" == "true" ]; then
+      openssl aes-256-cbc -K $encrypted_a0b3ebff647b_key -iv $encrypted_a0b3ebff647b_iv -in gh_rsa.enc -out gh_rsa -d;
+    fi
+
+install:
+  - if [ "$LANGUAGE" == "Ruby" ]; then gem install ronn; fi
+
+script:
+  - if [[ "$LANGUAGE" == "C++" ]]; then
+      ADDITIONAL_INCLUDE_DIR="$LIB_INSTALLDIR/include" ADDITIONAL_LINK_DIR="$LIB_INSTALLDIR/lib" make -j$(nproc);
+    fi
+  -
+  - if [ "$LANGUAGE" == "Ruby" ]; then
+      mkdir man; pushd man;
+      cp ../penerator.md .;
+      ronn --organization="nabijaczleweli" penerator.md;
+      man -l penerator.1 | cat;
+      popd;
+    fi
+
+after_success:
+  - if [ "$LANGUAGE" == "C++" ] && [ "$DEPLOY" ] && [ "$TRAVIS_TAG" ]; then
+      cp "out/penerator" "$DEPLOY_FILE";
+      strip --strip-all --remove-section=.comment --remove-section=.note "$DEPLOY_FILE";
+    fi
+  - if [ "$LANGUAGE" == "Ruby" ] && [ "$TRAVIS_SECURE_ENV_VARS" == "true" ]; then
+      (
+        echo "Update manual for commits $TRAVIS_COMMIT_RANGE";
+        echo;
+        git log $TRAVIS_COMMIT_RANGE --pretty=oneline;
+      ) >> $TRAVIS_BUILD_DIR/../MAN_UPDATE_MSG;
+      mkdir -p ~/.ssh && cp gh_rsa ~/.ssh/id_rsa && chmod 700 ~/.ssh && chmod 600 ~/.ssh/id_rsa;
+      git clone -b man git@github.com:$TRAVIS_REPO_SLUG.git $TRAVIS_BUILD_DIR-man;
+      cp -f man/* "$TRAVIS_BUILD_DIR-man";
+      pushd "$TRAVIS_BUILD_DIR-man";
+      git config --global user.email "nabijaczleweli@gmail.com";
+      git config --global user.name "Nabijaczleweli Autouploader Bot";
+      git config --global push.default simple;
+      git add *;
+      git commit -F $TRAVIS_BUILD_DIR/../MAN_UPDATE_MSG;
+      git push;
+      popd;
+    fi
+  - if [ "$LANGUAGE" == "Ruby" ] && [ "$TRAVIS_TAG" ]; then
+      cp -r man "$TRAVIS_BUILD_DIR/../penerator-man-$TRAVIS_TAG";
+      pushd "$TRAVIS_BUILD_DIR/..";
+      tar -caf "penerator-man-$TRAVIS_TAG.tbz2" "penerator-man-$TRAVIS_TAG";
+      rm -rf "penerator-man-$TRAVIS_TAG";
+      popd;
+    fi
+
+deploy:
+  provider: releases
+  api-key:
+    secure: GlPoT291FuQ+Qax87C04Kb0Zutf97NYyRZldOGN++MMzdAoM51U/AtCI3exMRvpNBcBEwe4XH1iysWgnqvZBlnEBPC/txPAqjcn/7mxnoe6iN9g2E3bez9LdVgOitckQPAXOUiG4SlvUQVy9UN5DuLUWr5Q6dqRztEbIEQo6c8bdPXT78E3uhA8ODTmrvuZNHwBYmp9LInx/NPJjGNhf0NyMAC2h6KPFqlw5wP318V4iWUUwXT4xkmIkMKc7Ab+LE4o6pBvuchgFxINMXp7LAlE1AgmOBITONcEpH3MiDPqvlnwrs362SIRIPAalhh7/aUfj6t0qs/Vc/H/qEH5CaXsMUDnwgGknr913kgI/ffx8jv5WTSJBUlh1EaARkC0UJBdRi2u1ACBHndLgkedA11cHTjoXQM75xzm4qQztbzlO3sEBSJQk3kVRd8E18wx4UyWIlIdvZ2UeUrCn//KA9/D8DjNzMVkpeWp5HQOeEB/d4b+gkJ5YJsVRBVZt3PC3t9Vo488jPxrcK3K0djk0QaJvkaxZ+ZTc4NLs4/o7Ccb4xDnB9MTmZUEYj5mFrnRXobLAylnmenWEEpCw1oj/CpvHq9ppFb5/3GwOoCFBnynhGryEwljnJn+2v8v/JzM7fI8ESBZGUNfCJ6UsKkCgyq97mxUnHBVh6wMvqO2Wdek=
+  file: "penerator-$TRAVIS_TAG.tbz2"
+  skip_cleanup: true
+  on:
+    tags: true
+    condition: $DEPLOY = true
