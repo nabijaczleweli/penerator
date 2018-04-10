@@ -22,16 +22,12 @@
 
 ifeq "$(OS)" "Windows_NT"
 	EXE := .exe
-	DLL := .dll
 	PIC :=
-	SFML_LINK_SUFF ?= -s
-	SEED11_SYSTEM_TYPE := windows
+	OS_LD_LIBS := ws2_32
 else
 	EXE := .out
-	DLL := .so
 	PIC := -fPIC
-	SFML_LINK_SUFF ?= -s
-	SEED11_SYSTEM_TYPE := unix
+	OS_LD_LIBS :=
 endif
 
 ifneq "$(ADDITIONAL_INCLUDE_DIR)" ""
@@ -55,7 +51,7 @@ PENERATOR_VERSION := "v0.1.0"
 OBJ := .o
 ARCH := .a
 AR := ar
-CXXAR := -O3 -fomit-frame-pointer -std=c++14 -pedantic -Wall -Wextra -pipe -pthread $(INCCXXAR) $(PIC)
+CXXAR := -O3 -fomit-frame-pointer -std=c++14 -pedantic -Wall -Wextra -pipe $(INCCXXAR) $(PIC)
 CCAR := -O3 -fomit-frame-pointer -std=c11 -pipe $(PIC)
 STRIP := strip
 STRIPAR := --strip-all --remove-section=.comment --remove-section=.note

@@ -25,7 +25,7 @@ include configMakefile
 
 LDDLLS := $(OS_LD_LIBS)
 LDAR := $(LNCXXAR) $(foreach l,$(foreach l, ,$(BLDDIR)$(l)),-L$(l)) $(foreach dll,$(LDDLLS),-l$(dll))
-INCAR := $(foreach l,$(foreach l, ,$(l)/include),-isystemext/$(l)) $(foreach l, ,-isystem$(BLDDIR)$(l)/include) -I$(BLDDIR)include
+INCAR := $(foreach l,mongoose $(foreach l, ,$(l)/include),-isystemext/$(l)) $(foreach l, ,-isystem$(BLDDIR)$(l)/include) -I$(BLDDIR)include
 VERAR := $(foreach l,PENERATOR,-D$(l)_VERSION='$($(l)_VERSION)')
 SOURCES := $(sort $(wildcard src/*.cpp src/**/*.cpp src/**/**/*.cpp src/**/**/**/*.cpp))
 HEADERS := $(sort $(wildcard src/*.hpp src/**/*.hpp src/**/**/*.hpp src/**/**/**/*.hpp))
@@ -42,8 +42,12 @@ clean :
 exe : $(OUTDIR)penerator$(EXE)
 
 
-$(OUTDIR)penerator$(EXE) : $(subst $(SRCDIR),$(OBJDIR),$(subst .cpp,$(OBJ),$(SOURCES)))
+$(OUTDIR)penerator$(EXE) : $(subst $(SRCDIR),$(OBJDIR),$(subst .cpp,$(OBJ),$(SOURCES))) $(BLDDIR)mongoose/mongoose.o
 	$(CXX) $(CXXAR) -o$@ $^ $(PIC) $(LDAR)
+
+$(BLDDIR)mongoose/mongoose.o : ext/mongoose/mongoose.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CCAR) -c -o$@ $^
 
 
 $(OBJDIR)%$(OBJ) : $(SRCDIR)%.cpp

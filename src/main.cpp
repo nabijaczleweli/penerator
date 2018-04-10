@@ -20,9 +20,12 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+#include "mongoose.h"
 #include <iostream>
 
 
 int main() {
 	std::cout << "Henlo\n";
+	std::cout << "penerator " PENERATOR_VERSION "\n"
+	             "mongoose v" MG_VERSION "\n";
 }
