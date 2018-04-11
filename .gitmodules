@@ -1,0 +1,3 @@
+[submodule "ext/TCLAP"]
+	path = ext/TCLAP
+	url = git://git.code.sf.net/p/tclap/code
