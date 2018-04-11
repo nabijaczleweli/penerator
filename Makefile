@@ -23,6 +23,8 @@
 include configMakefile
 
 
+MONGOOSE_DEFS = -DMG_ENABLE_MQTT=0 -DCS_DISABLE_SHA1=0 -DMG_ENABLE_THREADS=0 -DMG_ENABLE_DIRECTORY_LISTING=0 -DMG_ENABLE_FILESYSTEM=0 -DMG_ENABLE_THREADS=0 \
+                -DMG_ENABLE_HTTP_WEBSOCKET=0 -DMG_ENABLE_BROADCAST=0
 LDDLLS := $(OS_LD_LIBS)
 LDAR := $(LNCXXAR) $(foreach l,$(foreach l, ,$(BLDDIR)$(l)),-L$(l)) $(foreach dll,$(LDDLLS),-l$(dll))
 INCAR := $(foreach l,mongoose $(foreach l, ,$(l)/include),-isystemext/$(l)) $(foreach l, ,-isystem$(BLDDIR)$(l)/include) -I$(BLDDIR)include
@@ -47,9 +49,9 @@ $(OUTDIR)penerator$(EXE) : $(subst $(SRCDIR),$(OBJDIR),$(subst .cpp,$(OBJ),$(SOU
 
 $(BLDDIR)mongoose/mongoose.o : ext/mongoose/mongoose.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CCAR) -c -o$@ $^
+	$(CC) $(CCAR) $(MONGOOSE_DEFS) -c -o$@ $^
 
 
 $(OBJDIR)%$(OBJ) : $(SRCDIR)%.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) $(CXXAR) $(INCAR) $(VERAR) -c -o$@ $^
+	$(CXX) $(CXXAR) $(INCAR) $(VERAR) $(MONGOOSE_DEFS) -c -o$@ $^
