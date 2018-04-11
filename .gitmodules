@@ -1,3 +1,6 @@
 [submodule "ext/TCLAP"]
 	path = ext/TCLAP
 	url = git://git.code.sf.net/p/tclap/code
+[submodule "ext/variant-lite"]
+	path = ext/variant-lite
+	url = https://github.com/martinmoene/variant-lite
