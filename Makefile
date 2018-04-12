@@ -25,31 +25,41 @@ include configMakefile
 
 MONGOOSE_DEFS = -DMG_ENABLE_MQTT=0 -DCS_DISABLE_SHA1=0 -DMG_ENABLE_THREADS=0 -DMG_ENABLE_DIRECTORY_LISTING=0 -DMG_ENABLE_FILESYSTEM=0 -DMG_ENABLE_THREADS=0 \
                 -DMG_ENABLE_HTTP_WEBSOCKET=0 -DMG_ENABLE_BROADCAST=0
-LDDLLS := $(OS_LD_LIBS)
-LDAR := $(LNCXXAR) $(foreach l,$(foreach l, ,$(BLDDIR)$(l)),-L$(l)) $(foreach dll,$(LDDLLS),-l$(dll))
-INCAR := $(foreach l,mongoose $(foreach l, ,$(l)/include),-isystemext/$(l)) $(foreach l, ,-isystem$(BLDDIR)$(l)/include) -I$(BLDDIR)include
-VERAR := $(foreach l,PENERATOR,-D$(l)_VERSION='$($(l)_VERSION)')
+LDDLLS := mongoose $(OS_LD_LIBS)
+LDAR := $(LNCXXAR) $(foreach l,$(foreach l,mongoose,$(BLDDIR)$(l)),-L$(l)) $(foreach dll,$(LDDLLS),-l$(dll))
+INCAR := $(foreach l,mongoose $(foreach l,TCLAP,$(l)/include),-isystemext/$(l)) $(foreach l,variant-lite,-isystem$(BLDDIR)$(l)/include)
+VERAR := $(foreach l,PENERATOR TCLAP VARIANT_LITE,-D$(l)_VERSION='$($(l)_VERSION)')
 SOURCES := $(sort $(wildcard src/*.cpp src/**/*.cpp src/**/**/*.cpp src/**/**/**/*.cpp))
 HEADERS := $(sort $(wildcard src/*.hpp src/**/*.hpp src/**/**/*.hpp src/**/**/**/*.hpp))
 
-.PHONY : all clean exe
+.PHONY : all clean mongoose variant-lite exe
 .SECONDARY :
 
 
-all : exe
+all : mongoose variant-lite exe
 
 clean :
 	rm -rf $(OUTDIR)
 
-exe : $(OUTDIR)penerator$(EXE)
+exe : mongoose variant-lite $(OUTDIR)penerator$(EXE)
+mongoose : $(BLDDIR)mongoose/libmongoose$(ARCH)
+variant-lite : $(BLDDIR)variant-lite/include/nonstd/variant.hpp
 
 
-$(OUTDIR)penerator$(EXE) : $(subst $(SRCDIR),$(OBJDIR),$(subst .cpp,$(OBJ),$(SOURCES))) $(BLDDIR)mongoose/mongoose.o
+$(OUTDIR)penerator$(EXE) : $(subst $(SRCDIR),$(OBJDIR),$(subst .cpp,$(OBJ),$(SOURCES)))
 	$(CXX) $(CXXAR) -o$@ $^ $(PIC) $(LDAR)
 
 $(BLDDIR)mongoose/mongoose.o : ext/mongoose/mongoose.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CCAR) $(MONGOOSE_DEFS) -c -o$@ $^
+
+$(BLDDIR)mongoose/libmongoose$(ARCH) : $(BLDDIR)mongoose/mongoose.o
+	@mkdir -p $(dir $@)
+	$(AR) crs $@ $^
+
+$(BLDDIR)variant-lite/include/nonstd/variant.hpp : ext/variant-lite/include/nonstd/variant.hpp
+	@mkdir -p $(dir $@)
+	cp $^ $@
 
 
 $(OBJDIR)%$(OBJ) : $(SRCDIR)%.cpp

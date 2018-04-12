@@ -46,7 +46,9 @@ INCCMAKEAR := CXXFLAGS="$(INCCXXAR)"
 LNCMAKEAR := LDFLAGS="$(LNCXXAR)"
 
 # PENERATOR_VERSION := "$(patsubst v%,%,$(shell git describe --tags --abbrev=0))"
-PENERATOR_VERSION := "v0.1.0"
+PENERATOR_VERSION := "0.1.0"
+TCLAP_VERSION := "$(shell cat ext/TCLAP/configure.in | grep AM_INIT_AUTOMAKE | sed "s/.*(tclap,\(.*\))/\1/")"
+VARIANT_LITE_VERSION := "$(shell git -C ext/variant-lite log -1 --pretty="%h" | grep -v gpg)"
 
 OBJ := .o
 ARCH := .a

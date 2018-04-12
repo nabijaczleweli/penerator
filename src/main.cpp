@@ -22,10 +22,9 @@
 
 #include "mongoose.h"
 #include "mongoose.hpp"
+#include "options/options.hpp"
 #include <iostream>
 
-
-static const constexpr auto s_http_port = ":8080";
 
 static void ev_handler(struct mg_connection * conn, int ev, void * ev_data) {
 	std::cout << ev << '\n';
@@ -52,15 +51,19 @@ static void ev_handler(struct mg_connection * conn, int ev, void * ev_data) {
 }
 
 
-int main() {
-	std::cout << "penerator " PENERATOR_VERSION "\n"
-	             "mongoose v" MG_VERSION "\n";
+int main(int argc, const char ** argv) {
+	const auto opts_r = penerator::options::parse(argc, argv);
+	if(const auto error_val = nonstd::get_if<penerator::option_err>(&opts_r)) {
+		std::cerr << error_val->second << '\n';
+		return error_val->first;
+	}
+	const auto opts = std::move(nonstd::get<penerator::options>(opts_r));
 
 	auto manager = penerator::mg_mgr_init(nullptr);
 	const char * err{};
-	mg_bind_opts opts{};
-	opts.error_string = &err;
-	auto conn         = mg_bind_opt(manager.get(), s_http_port, ev_handler, opts);
+	mg_bind_opts bind_opts{};
+	bind_opts.error_string = &err;
+	auto conn              = mg_bind_opt(manager.get(), opts.address.c_str(), ev_handler, bind_opts);
 	std::cout << conn << '\n';
 	std::cout << (void *)err << '\n';
 	if(err)
