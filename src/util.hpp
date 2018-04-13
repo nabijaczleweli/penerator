@@ -24,6 +24,7 @@
 #pragma once
 
 
+#include <cstdint>
 #include <string>
 
 
@@ -31,4 +32,6 @@ namespace penerator {
 	/// Check if the specified string is a valid bind address in the form "[[IP_ADDRESS]:]PORT".
 	bool verify_bind_address(const char * addr);
 	bool verify_bind_address(const std::string & addr);
+
+	bool verify_password_length(const char * query, std::size_t len);
 }

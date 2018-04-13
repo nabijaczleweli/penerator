@@ -21,23 +21,44 @@
 // DEALINGS IN THE SOFTWARE.
 
 
-#include "util.hpp"
-#include <algorithm>
-#include <regex>
+#pragma once
 
 
-static const std::regex bind_address_regex{"^(?:(?:[.[:alnum:]]+)?:)?[[:digit:]]{1,5}$"};
+#include <fstream>
+#include <mongoose.h>
+#include <string>
+#include <vector>
 
 
-bool penerator::verify_bind_address(const char * addr) {
-	std::cmatch match;
-	return std::regex_match(addr, match, bind_address_regex);
-}
+namespace penerator {
+	extern const std::string bad_request_response;
+	extern const std::vector<char> password_characters;
 
-bool penerator::verify_bind_address(const std::string & addr) {
-	return verify_bind_address(addr.c_str());
-}
 
-bool penerator::verify_password_length(const char * query, std::size_t len) {
-	return len != 0 && std::find_if_not(query, query + len, [](auto c) { return c >= '0' && c <= '9'; }) == query + len;
+	/// A `UniformRandomBitGenerator` taking the `UniformRandomBit`s from `"/dev/urandom"`.
+	class dev_urandom_gen {
+	private:
+		std::ifstream in;
+
+	public:
+		using result_type = std::uint8_t;
+
+		dev_urandom_gen();
+		operator bool() const;
+
+		result_type min() const noexcept;
+		result_type max() const noexcept;
+
+		result_type operator()();
+	};
+
+
+	/// Event handler attachable to a connection.
+	void generic_event_handler(mg_connection * conn, int ev, void * ev_data);
+
+	/// Event handler for HTTP requests.
+	void http_event_handler(mg_connection & conn, http_message & message);
+
+	/// Generate a random password of `length` bytes.
+	std::string generate_password(dev_urandom_gen & gen, std::size_t length);
 }
