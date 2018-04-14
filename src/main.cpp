@@ -38,14 +38,18 @@ int main(int argc, const char ** argv) {
 	penerator::dev_urandom_gen generator;
 
 	auto manager = penerator::mg_mgr_init(&generator);
-	const char * err{};
-	mg_bind_opts bind_opts{};
-	bind_opts.error_string = &err;
-	auto conn              = mg_bind_opt(manager.get(), opts.address.c_str(), penerator::generic_event_handler, bind_opts);
-	std::cout << conn << '\n';
-	std::cout << (void *)err << '\n';
-	if(err)
-		std::cout << err << '\n';
+
+	auto conn_r = penerator::mg_bind_or_err(manager.get(), opts.address, penerator::generic_event_handler);
+	if(const auto error_val = nonstd::get_if<const char *>(&conn_r)) {
+		std::cerr << "Couldn't open connection";
+		if(error_val)
+			std::cerr << ": " << *error_val;
+		std::cerr << ".\n";
+
+		return 17;
+	}
+	const auto conn = std::move(nonstd::get<mg_connection *>(conn_r));
+
 	mg_set_protocol_http_websocket(conn);
 
 	for(;;)

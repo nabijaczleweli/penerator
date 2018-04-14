@@ -39,3 +39,22 @@ std::unique_ptr<mg_mgr, penerator::mg_mgr_deleter> penerator::mg_mgr_init(void *
 	::mg_mgr_init_opt(manager, userdata, std::move(opts));
 	return std::unique_ptr<mg_mgr, penerator::mg_mgr_deleter>{manager};
 }
+
+nonstd::variant<mg_connection *, const char *> penerator::mg_bind_or_err(mg_mgr * manager, const char * address,
+                                                                         MG_CB(mg_event_handler_t handler, void * user_data)) {
+	const char * err = nullptr;
+	mg_bind_opts opts{};
+	opts.error_string = &err;
+
+	const auto conn = ::mg_bind_opt(manager, address, MG_CB(handler, user_data), opts);
+
+	if(conn)
+		return {conn};
+	else
+		return {err};
+}
+
+nonstd::variant<mg_connection *, const char *> penerator::mg_bind_or_err(mg_mgr * manager, const std::string & address,
+                                                                         MG_CB(mg_event_handler_t handler, void * user_data)) {
+	return mg_bind_or_err(manager, address.c_str(), MG_CB(handler, user_data));
+}

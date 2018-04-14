@@ -25,6 +25,8 @@
 
 #include "mongoose.h"
 #include <memory>
+#include <nonstd/variant.hpp>
+#include <string>
 
 
 namespace penerator {
@@ -35,4 +37,8 @@ namespace penerator {
 
 	std::unique_ptr<mg_mgr, mg_mgr_deleter> mg_mgr_init(void * userdata);
 	std::unique_ptr<mg_mgr, mg_mgr_deleter> mg_mgr_init(void * userdata, mg_mgr_init_opts && opts);
+
+	nonstd::variant<mg_connection *, const char *> mg_bind_or_err(mg_mgr * manager, const char * address, MG_CB(mg_event_handler_t handler, void * user_data));
+	nonstd::variant<mg_connection *, const char *> mg_bind_or_err(mg_mgr * manager, const std::string & address,
+	                                                              MG_CB(mg_event_handler_t handler, void * user_data));
 }
