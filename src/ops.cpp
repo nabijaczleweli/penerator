@@ -25,11 +25,19 @@
 #include "util/ops.hpp"
 #include <algorithm>
 #include <cstring>
+#include <ctime>
+#include <iomanip>
+#include <iostream>
 #include <random>
 #include <string>
 
 
-const std::string penerator::bad_request_response      = "400 Bad Request";
+const char * const penerator::response_headers = "Content-Type: text/plain\r\n"
+                                                 "Cache-Control: no-cache\r\n"
+                                                 "Server: penerator/" PENERATOR_VERSION;
+
+const std::string penerator::bad_request_response = "400 Bad Request";
+
 const std::vector<char> penerator::password_characters = []() {
 	const auto str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890~!`@#$%^&*()_+-=[]\\{}|;':\",./<>?";
 	return std::vector<char>{str, str + std::strlen(str)};
@@ -64,13 +72,20 @@ void penerator::http_event_handler(mg_connection & conn, http_message & message)
 	if(message.uri.len == 1 &&                  // Equivalent to checking for uri == "/"
 	   mg_vcmp(&message.method, "GET") == 0 &&  //
 	   verify_password_length(message.query_string.p, message.query_string.len)) {
-		const auto length   = std::strtoul(message.query_string.p, nullptr, 10);
+		const auto length = std::strtoul(message.query_string.p, nullptr, 10);
+
+		//             255 .   255 .   255 .  255  :   65535
+		char remote_ip[3 + 1 + 3 + 1 + 3 + 1 + 3 + 1 + 5 + 1]{};
+		mg_conn_addr_to_str(&conn, remote_ip, sizeof(remote_ip) / sizeof(*remote_ip), MG_SOCK_STRINGIFY_IP | MG_SOCK_STRINGIFY_PORT | MG_SOCK_STRINGIFY_REMOTE);
+		const auto current_time = std::time(nullptr);
+		std::cout << '[' << std::put_time(std::localtime(&current_time), "%Y-%m-%d %H:%M:%S") << "] Serving " << length << " characters to " << remote_ip << ".\n";
+
 		const auto password = generate_password(*static_cast<dev_urandom_gen *>(conn.mgr->user_data), length);
 
-		mg_send_head(&conn, 200, password.size(), "Content-Type: text/plain");
+		mg_send_head(&conn, 200, password.size(), response_headers);
 		mg_send(&conn, password.c_str(), password.size());
 	} else {
-		mg_send_head(&conn, 400, bad_request_response.size(), "Content-Type: text/plain");
+		mg_send_head(&conn, 400, bad_request_response.size(), response_headers);
 		mg_send(&conn, bad_request_response.c_str(), bad_request_response.size());
 	}
 }

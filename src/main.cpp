@@ -57,11 +57,16 @@ int main(int argc, const char ** argv) {
 
 	mg_set_protocol_http_websocket(conn);
 
+
+	std::cout << "Listening on " << opts.address << "...\n"
+	          << "Ctrl-C to stop.\n"
+	             "\n";
+
 	bool ctrl_c_pressed = false;
 	penerator::set_ctrl_c_handler([&]() { ctrl_c_pressed = true; });
 	while(!ctrl_c_pressed)
 		mg_mgr_poll(manager.get(), 1000);
 
 	std::cout << "\n"
-	             "Ctrl+C received, terminating...\n";
+	             "Ctrl-C received, terminating...\n";
 }

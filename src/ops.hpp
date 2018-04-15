@@ -31,6 +31,7 @@
 
 
 namespace penerator {
+	extern const char * const response_headers;
 	extern const std::string bad_request_response;
 	extern const std::vector<char> password_characters;
 
