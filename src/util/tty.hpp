@@ -21,21 +21,15 @@
 // DEALINGS IN THE SOFTWARE.
 
 
-#include "constraints.hpp"
-#include "../util/options.hpp"
+#pragma once
 
 
-#define DEFINE_CONSTRAINT(constraint_name, desc, check_expr)                                                  \
-	std::string penerator::constraint_name##_constraint::description() const { return desc; }                   \
-                                                                                                              \
-	std::string penerator::constraint_name##_constraint::shortID() const { return arg_name; }                   \
-                                                                                                              \
-	bool penerator::constraint_name##_constraint::check(const std::string & value) const { return check_expr; } \
-                                                                                                              \
-	penerator::constraint_name##_constraint::constraint_name##_constraint(std::string argname) : arg_name(std::move(argname)) {}
+#include <functional>
 
 
-DEFINE_CONSTRAINT(bind_address, "address to bind to in form of [[IP_ADDRESS]:]PORT", verify_bind_address(value))
-
-
-#undef DEFINE_CONSTRAINT
+namespace penerator {
+	/// Set a Ctrl+C handler to the specified handler function.
+	///
+	/// Returns `true` on success, `false` otherwise.
+	bool set_ctrl_c_handler(std::function<void()> handler);
+}

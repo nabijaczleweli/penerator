@@ -21,21 +21,31 @@
 // DEALINGS IN THE SOFTWARE.
 
 
-#include "constraints.hpp"
-#include "../util/options.hpp"
+#ifndef _WIN32
 
 
-#define DEFINE_CONSTRAINT(constraint_name, desc, check_expr)                                                  \
-	std::string penerator::constraint_name##_constraint::description() const { return desc; }                   \
-                                                                                                              \
-	std::string penerator::constraint_name##_constraint::shortID() const { return arg_name; }                   \
-                                                                                                              \
-	bool penerator::constraint_name##_constraint::check(const std::string & value) const { return check_expr; } \
-                                                                                                              \
-	penerator::constraint_name##_constraint::constraint_name##_constraint(std::string argname) : arg_name(std::move(argname)) {}
+#include "tty.hpp"
+#include <signal.h>
 
 
-DEFINE_CONSTRAINT(bind_address, "address to bind to in form of [[IP_ADDRESS]:]PORT", verify_bind_address(value))
+static std::function<void()> ctrl_c_handler{};
 
 
-#undef DEFINE_CONSTRAINT
+bool penerator::set_ctrl_c_handler(std::function<void()> handler) {
+	ctrl_c_handler.swap(handler);
+
+
+	if(!handler) {
+		struct sigaction arg{};
+		arg.sa_handler = [](auto) {
+			if(ctrl_c_handler)
+				ctrl_c_handler();
+		};
+
+		return !sigaction(SIGINT, &arg, nullptr);
+	} else
+		return true;
+}
+
+
+#endif

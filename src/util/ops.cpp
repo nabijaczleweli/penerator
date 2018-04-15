@@ -21,22 +21,9 @@
 // DEALINGS IN THE SOFTWARE.
 
 
-#include "util.hpp"
+#include "ops.hpp"
 #include <algorithm>
-#include <regex>
 
-
-static const std::regex bind_address_regex{"^(?:(?:[.[:alnum:]]+)?:)?[[:digit:]]{1,5}$"};
-
-
-bool penerator::verify_bind_address(const char * addr) {
-	std::cmatch match;
-	return std::regex_match(addr, match, bind_address_regex);
-}
-
-bool penerator::verify_bind_address(const std::string & addr) {
-	return verify_bind_address(addr.c_str());
-}
 
 bool penerator::verify_password_length(const char * query, std::size_t len) {
 	return len != 0 && std::find_if_not(query, query + len, [](auto c) { return c >= '0' && c <= '9'; }) == query + len;

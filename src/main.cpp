@@ -23,6 +23,7 @@
 #include "mongoose.hpp"
 #include "ops.hpp"
 #include "options/options.hpp"
+#include "util/tty.hpp"
 #include <iostream>
 #include <mongoose.h>
 
@@ -36,6 +37,10 @@ int main(int argc, const char ** argv) {
 	const auto opts = std::move(nonstd::get<penerator::options>(opts_r));
 
 	penerator::dev_urandom_gen generator;
+	if(!generator) {
+		std::cerr << "Couldn't open /dev/urandom.";
+		return 16;
+	}
 
 	auto manager = penerator::mg_mgr_init(&generator);
 
@@ -52,6 +57,11 @@ int main(int argc, const char ** argv) {
 
 	mg_set_protocol_http_websocket(conn);
 
-	for(;;)
+	bool ctrl_c_pressed = false;
+	penerator::set_ctrl_c_handler([&]() { ctrl_c_pressed = true; });
+	while(!ctrl_c_pressed)
 		mg_mgr_poll(manager.get(), 1000);
+
+	std::cout << "\n"
+	             "Ctrl+C received, terminating...\n";
 }

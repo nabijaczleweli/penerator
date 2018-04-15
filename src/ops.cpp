@@ -22,10 +22,9 @@
 
 
 #include "ops.hpp"
-#include "util.hpp"
+#include "util/ops.hpp"
 #include <algorithm>
 #include <cstring>
-#include <iostream>
 #include <random>
 #include <string>
 

@@ -21,17 +21,18 @@
 // DEALINGS IN THE SOFTWARE.
 
 
-#pragma once
+#include "options.hpp"
+#include <regex>
 
 
-#include <cstdint>
-#include <string>
+static const std::regex bind_address_regex{"^(?:(?:[.[:alnum:]]+)?:)?[[:digit:]]{1,5}$"};
 
 
-namespace penerator {
-	/// Check if the specified string is a valid bind address in the form "[[IP_ADDRESS]:]PORT".
-	bool verify_bind_address(const char * addr);
-	bool verify_bind_address(const std::string & addr);
+bool penerator::verify_bind_address(const char * addr) {
+	std::cmatch match;
+	return std::regex_match(addr, match, bind_address_regex);
+}
 
-	bool verify_password_length(const char * query, std::size_t len);
+bool penerator::verify_bind_address(const std::string & addr) {
+	return verify_bind_address(addr.c_str());
 }

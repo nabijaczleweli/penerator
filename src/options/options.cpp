@@ -21,6 +21,7 @@
 
 
 #include "options.hpp"
+#include "../util/options.hpp"
 #include "constraints.hpp"
 #include <tclap/CmdLine.h>
 #include <tclap/ValueArg.h>
@@ -38,7 +39,7 @@ nonstd::variant<penerator::options, penerator::option_err> penerator::options::p
 		command_line.setExceptionHandling(false);
 		command_line.parse(argc, argv);
 
-			ret.address = address.getValue();
+		ret.address = address.getValue();
 	} catch(const TCLAP::ArgException & e) {
 		auto arg_id = e.argId();
 		if(arg_id == " ")
