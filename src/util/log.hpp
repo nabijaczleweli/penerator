@@ -24,10 +24,10 @@
 #pragma once
 
 
-#include <cstdint>
+#include <ostream>
 
 
 namespace penerator {
-	/// Check if the specified URL query is a valid password length
-	bool verify_password_length(const char * query, std::size_t len);
+	/// Output the current datetime to the specified stream
+	std::ostream & date_prefix(std::ostream & stream);
 }

@@ -23,10 +23,9 @@
 
 #include "ops.hpp"
 #include "util/ops.hpp"
+#include "util/log.hpp"
 #include <algorithm>
 #include <cstring>
-#include <ctime>
-#include <iomanip>
 #include <iostream>
 #include <random>
 #include <string>
@@ -77,8 +76,7 @@ void penerator::http_event_handler(mg_connection & conn, http_message & message)
 		//             255 .   255 .   255 .  255  :   65535
 		char remote_ip[3 + 1 + 3 + 1 + 3 + 1 + 3 + 1 + 5 + 1]{};
 		mg_conn_addr_to_str(&conn, remote_ip, sizeof(remote_ip) / sizeof(*remote_ip), MG_SOCK_STRINGIFY_IP | MG_SOCK_STRINGIFY_PORT | MG_SOCK_STRINGIFY_REMOTE);
-		const auto current_time = std::time(nullptr);
-		std::cout << '[' << std::put_time(std::localtime(&current_time), "%Y-%m-%d %H:%M:%S") << "] Serving " << length << " characters to " << remote_ip << ".\n";
+		std::cout << date_prefix << " Serving " << length << " characters to " << remote_ip << ".\n";
 
 		const auto password = generate_password(*static_cast<dev_urandom_gen *>(conn.mgr->user_data), length);
 

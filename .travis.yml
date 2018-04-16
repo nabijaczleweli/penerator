@@ -79,7 +79,7 @@ script:
 
 after_success:
   - if [ "$LANGUAGE" == "C++" ] && [ "$DEPLOY" ] && [ "$TRAVIS_TAG" ]; then
-      cp "out/penerator" "$DEPLOY_FILE";
+      cp "out/penerator.out" "$DEPLOY_FILE";
       strip --strip-all --remove-section=.comment --remove-section=.note "$DEPLOY_FILE";
     fi
   - if [ "$LANGUAGE" == "Ruby" ] && [ "$TRAVIS_SECURE_ENV_VARS" == "true" ]; then
@@ -112,7 +112,7 @@ deploy:
   provider: releases
   api-key:
     secure: GlPoT291FuQ+Qax87C04Kb0Zutf97NYyRZldOGN++MMzdAoM51U/AtCI3exMRvpNBcBEwe4XH1iysWgnqvZBlnEBPC/txPAqjcn/7mxnoe6iN9g2E3bez9LdVgOitckQPAXOUiG4SlvUQVy9UN5DuLUWr5Q6dqRztEbIEQo6c8bdPXT78E3uhA8ODTmrvuZNHwBYmp9LInx/NPJjGNhf0NyMAC2h6KPFqlw5wP318V4iWUUwXT4xkmIkMKc7Ab+LE4o6pBvuchgFxINMXp7LAlE1AgmOBITONcEpH3MiDPqvlnwrs362SIRIPAalhh7/aUfj6t0qs/Vc/H/qEH5CaXsMUDnwgGknr913kgI/ffx8jv5WTSJBUlh1EaARkC0UJBdRi2u1ACBHndLgkedA11cHTjoXQM75xzm4qQztbzlO3sEBSJQk3kVRd8E18wx4UyWIlIdvZ2UeUrCn//KA9/D8DjNzMVkpeWp5HQOeEB/d4b+gkJ5YJsVRBVZt3PC3t9Vo488jPxrcK3K0djk0QaJvkaxZ+ZTc4NLs4/o7Ccb4xDnB9MTmZUEYj5mFrnRXobLAylnmenWEEpCw1oj/CpvHq9ppFb5/3GwOoCFBnynhGryEwljnJn+2v8v/JzM7fI8ESBZGUNfCJ6UsKkCgyq97mxUnHBVh6wMvqO2Wdek=
-  file: "penerator-$TRAVIS_TAG.tbz2"
+  file: "$DEPLOY_FILE"
   skip_cleanup: true
   on:
     tags: true

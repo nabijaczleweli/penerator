@@ -21,13 +21,17 @@
 // DEALINGS IN THE SOFTWARE.
 
 
-#pragma once
+#include "log.hpp"
+#include <ctime>
 
 
-#include <cstdint>
+std::ostream & penerator::date_prefix(std::ostream & stream) {
+	const auto current_time = std::time(nullptr);
 
+	//            2018.   12  .   31      24  :   60  :   60
+	char out_time[4 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 1 + 2 + 1]{};
+	strftime(out_time, sizeof(out_time) / sizeof(*out_time), "%Y-%m-%d %H:%M:%S", std::localtime(&current_time));
 
-namespace penerator {
-	/// Check if the specified URL query is a valid password length
-	bool verify_password_length(const char * query, std::size_t len);
+	stream << '[' << out_time << ']';
+	return stream;
 }
