@@ -7,13 +7,34 @@
 \fBpenerator\fR \- Generate a secure password over your local network
 .
 .SH "SYNOPSIS"
-\fBpenerator\fR \fIOPTIONS\fR
+\fBpenerator\fR [[[IP_ADDRESS]:]PORT]
 .
 .SH "DESCRIPTION"
 Generate a secure password over your local network\.
 .
+.P
+When GETting \fB/?<NUMBER>\fR, a secure (i\.e\. \fB/dev/urandom\fR as randomness source) password of length \fBNUMBER\fR will be returned in plaintext\.
+.
 .SH "OPTIONS"
-[TODO]
+[[[IP_ADDRESS]:]PORT]
+.
+.IP "" 4
+.
+.nf
+
+Address to bind to\.
+
+If IP_ADDRESS is not specified the listener will be bound to the specified
+port on all interfaces\.
+
+Otherwise the listener will be bound to the specified port on the interface
+denoted by the IP_ADDRESS\.
+
+Default: 8000\.
+.
+.fi
+.
+.IP "" 0
 .
 .SH "AUTHOR"
 Written by nabijaczleweli <\fInabijaczleweli@gmail\.com\fR>
