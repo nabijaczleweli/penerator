@@ -1,1 +1,1 @@
-# [penerator manpage](https://cdn.rawgit.com/nabijaczleweli/penerator/man/penerator.1.html)
+# [penerator manpage](https://rawcdn.githack.com/nabijaczleweli/penerator/man/penerator.1.html)
